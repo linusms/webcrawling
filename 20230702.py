@@ -112,3 +112,43 @@ from bs4 import BeautifulSoup
 html=urlopen('http://www.pythonscraping.com/pages/page3.html')
 bs=BeautifulSoup(html, 'html.parser')
 print(bs.find('img', {'src': '../img/gifts/img1.jpg'}).parent.previous_sibling.get_text())
+
+# 3장. 크롤링 시작하기
+# 정규 표현식 이용해 재귀적 크롤링 해보기
+
+#%%
+from urllib.request import urlopen
+from bs4 import BeautifulSoup
+
+html=urlopen('http://en.wikipedia.org/wiki/Kevin_Bacon')
+bs=BeautifulSoup(html, 'html.parser')
+for link in bs.findAll('a'):
+    if 'href' in link.attrs:
+        print(link.attrs['href'])
+        
+#%%
+
+from urllib.request import urlopen
+from bs4 import BeautifulSoup
+import datetime
+import random
+import re
+
+random.seed(datetime.datetime.now())
+
+def getWikiLinks(articleUrl):
+    html=urlopen('http://en.wikipedia.org{}'.format(articleUrl))
+    bs=BeautifulSoup(html, 'html.parser')
+    return bs.find('div', {'id':'bodyContent'}).findAll('a',href=re.compile('^(/wiki/)((?!:).)*$'))
+
+links=getWikiLinks('/wiki/Kevin_Bacon')
+count=0
+while len(links)>0:
+    if count==10:
+        break
+    else:
+        newArticle=links[random.randint(0,len(links)-1)].attrs['href']
+        print(newArticle)
+        links=getWikiLinks(newArticle)
+        count+=1
+        
